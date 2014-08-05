@@ -38,7 +38,11 @@ class RPCListener(object):
             port = self.config.get('gearman', 'port')
         else:
             port = 4730
-        self.worker = gear.Worker('Zuul RPC Listener')
+        if self.config.has_option('zuul', 'namespace'):
+            namespace = self.config.get('zuul', 'namespace')
+        else:
+            namespace = ""
+        self.worker = gear.Worker('Zuul RPC Listener %s' % namespace)
         self.worker.addServer(server, port)
         self.thread = threading.Thread(target=self.run)
         self.thread.daemon = True

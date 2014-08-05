@@ -59,7 +59,11 @@ class MergeServer(object):
             port = self.config.get('gearman', 'port')
         else:
             port = 4730
-        self.worker = gear.Worker('Zuul Merger')
+        if self.config.has_option('zuul', 'namespace'):
+            namespace = self.config.get('zuul', 'namespace')
+        else:
+            namespace = 4730
+        self.worker = gear.Worker('Zuul Merger %s' % namespace)
         self.worker.addServer(server, port)
         self.log.debug("Waiting for server")
         self.worker.waitForServer()
