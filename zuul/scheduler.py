@@ -720,7 +720,7 @@ class Scheduler(threading.Thread):
                        "to pipeline %s" % (event, change, self))
         self.log.info("Adding %s, %s to %s" %
                       (project, change, pipeline))
-        pipeline.manager.addChange(change, ignore_requirements=True)
+        pipeline.manager.addChange(change, quiet=True, ignore_requirements=True)
 
     def _areAllBuildsComplete(self):
         self.log.debug("Checking if all builds are complete")
