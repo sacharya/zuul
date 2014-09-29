@@ -18,7 +18,7 @@ import time
 
 import gear
 
-import zuul.cmd
+from zuul.cmd.merger import Merger
 
 
 class RPCFailure(Exception):
