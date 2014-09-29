@@ -36,7 +36,7 @@ class RPCClient(object):
         self.log.debug("Waiting for gearman")
         self.gearman.waitForServer()
 
-    def load_config():
+    def load_config(self):
         server = Merger()
         server.read_config()
         if server.config.has_option('zuul', 'namespace'):
