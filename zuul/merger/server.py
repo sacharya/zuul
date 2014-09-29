@@ -48,6 +48,11 @@ class MergeServer(object):
             sshkey = self.config.get('gerrit', 'sshkey')
         else:
             sshkey = None
+        
+        if self.config.has_option('zuul', 'namespace'):
+            self.namespace = self.config.get('zuul', 'namespace')
+        else:
+            self.namespace = ""
 
         self.merger = merger.Merger(merge_root, sshkey,
                                     merge_email, merge_name)
@@ -59,11 +64,7 @@ class MergeServer(object):
             port = self.config.get('gearman', 'port')
         else:
             port = 4730
-        if self.config.has_option('zuul', 'namespace'):
-            namespace = self.config.get('zuul', 'namespace')
-        else:
-            namespace = 4730
-        self.worker = gear.Worker('Zuul Merger %s' % namespace)
+        self.worker = gear.Worker('Zuul Merger %s' % self.namespace)
         self.worker.addServer(server, port)
         self.log.debug("Waiting for server")
         self.worker.waitForServer()
@@ -75,8 +76,8 @@ class MergeServer(object):
         self.thread.start()
 
     def register(self):
-        self.worker.registerFunction("merger:merge")
-        self.worker.registerFunction("merger:update")
+        self.worker.registerFunction("merger:merge:%s" % self.namespace)
+        self.worker.registerFunction("merger:update:%s" % self.namespace)
 
     def stop(self):
         self.log.debug("Stopping")
@@ -93,10 +94,10 @@ class MergeServer(object):
             try:
                 job = self.worker.getJob()
                 try:
-                    if job.name == 'merger:merge':
+                    if job.name == 'merger:merge:%s' % self.namespace:
                         self.log.debug("Got merge job.")
                         self.merge(job)
-                    elif job.name == 'merger:update':
+                    elif job.name == 'merger:update:%s' % self.namespace:
                         self.log.debug("Got update job.")
                         self.update(job)
                     else:

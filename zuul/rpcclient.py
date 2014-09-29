@@ -18,6 +18,8 @@ import time
 
 import gear
 
+import zuul.cmd
+
 
 class RPCFailure(Exception):
     pass
@@ -27,13 +29,24 @@ class RPCClient(object):
     log = logging.getLogger("zuul.RPCClient")
 
     def __init__(self, server, port):
+        self.load_config()
         self.log.debug("Connecting to gearman at %s:%s" % (server, port))
         self.gearman = gear.Client()
         self.gearman.addServer(server, port)
         self.log.debug("Waiting for gearman")
         self.gearman.waitForServer()
 
+    def load_config():
+        server = Merger()
+        server.read_config()
+        if server.config.has_option('zuul', 'namespace'):
+            self.namespace = self.config.get('zuul', 'namespace')
+        else:
+            self.namespace = ""
+
     def submitJob(self, name, data):
+        if self.namespace:
+            name = name + ":" +  self.namespace
         self.log.debug("Submitting job %s with data %s" % (name, data))
         job = gear.Job(name,
                        json.dumps(data),
