@@ -39,10 +39,10 @@ class RPCListener(object):
         else:
             port = 4730
         if self.config.has_option('zuul', 'namespace'):
-            namespace = self.config.get('zuul', 'namespace')
+            self.namespace = self.config.get('zuul', 'namespace')
         else:
-            namespace = ""
-        self.worker = gear.Worker('Zuul RPC Listener %s' % namespace)
+            self.namespace = ""
+        self.worker = gear.Worker('Zuul RPC Listener %s' % self.namespace)
         self.worker.addServer(server, port)
         self.thread = threading.Thread(target=self.run)
         self.thread.daemon = True
@@ -51,9 +51,9 @@ class RPCListener(object):
         self.register()
 
     def register(self):
-        self.worker.registerFunction("zuul:enqueue")
-        self.worker.registerFunction("zuul:promote")
-        self.worker.registerFunction("zuul:get_running_jobs")
+        self.worker.registerFunction("zuul:enqueue:%s" % self.namespace)
+        self.worker.registerFunction("zuul:promote:%s" % self.namespace)
+        self.worker.registerFunction("zuul:get_running_jobs:%s" % self.namespace)
 
     def stop(self):
         self.log.debug("Stopping")

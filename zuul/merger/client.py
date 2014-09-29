@@ -64,6 +64,10 @@ class MergeClient(object):
             port = self.config.get('gearman', 'port')
         else:
             port = 4730
+        if self.config.has_option('zuul', 'namespace'):
+            self.namespace = self.config.get('zuul', 'namespace')
+        else:
+            self.namespace = ""
         self.log.debug("Connecting to gearman at %s:%s" % (server, port))
         self.gearman = MergeGearmanClient(self)
         self.gearman.addServer(server, port)
@@ -80,6 +84,7 @@ class MergeClient(object):
         return False
 
     def submitJob(self, name, data, build_set):
+        name = name + ":" +  self.namespace
         uuid = str(uuid4().hex)
         self.log.debug("Submitting job %s with data %s" % (name, data))
         job = gear.Job(name,
