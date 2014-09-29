@@ -12,13 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from six.moves import configparser as ConfigParser
 import json
 import logging
+import os
 import time
 
 import gear
-
-from zuul.cmd.merger import Merger
 
 
 class RPCFailure(Exception):
@@ -37,10 +37,15 @@ class RPCClient(object):
         self.gearman.waitForServer()
 
     def load_config(self):
-        server = Merger()
-        server.read_config()
-        if server.config.has_option('zuul', 'namespace'):
-            self.namespace = self.config.get('zuul', 'namespace')
+        config = ConfigParser.ConfigParser()
+        locations = ['/etc/zuul/zuul.conf',
+                         '~/zuul.conf']
+        for fp in locations:
+            if os.path.exists(os.path.expanduser(fp)):
+                config.read(os.path.expanduser(fp))
+                break
+        if config.has_option('zuul', 'namespace'):
+            self.namespace = config.get('zuul', 'namespace')
         else:
             self.namespace = ""
 
