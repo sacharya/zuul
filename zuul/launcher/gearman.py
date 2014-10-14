@@ -246,12 +246,17 @@ class Gearman(object):
                                             'default_logserver_prefix'):
                     swift_instructions['LOGSERVER_PREFIX'] = \
                         self.config.get('swift', 'default_logserver_prefix')
-
+        
+                if self.config.has_option('swift',
+                                          'X-Delete-After'):
+                    swift_instructions['X_DELETE_AFTER'] = \
+                        self.config.get('swift', 'X-Delete-After')
+        
                 # Create a set of zuul instructions for each instruction-set
                 # given  in the form of NAME_PARAMETER=VALUE
                 for key, value in swift_instructions.items():
                     params['_'.join(['SWIFT', name, key])] = value
-
+        
         if callable(job.parameter_function):
             pargs = inspect.getargspec(job.parameter_function)
             if len(pargs.args) == 2:
